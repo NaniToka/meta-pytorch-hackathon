@@ -45,11 +45,26 @@ CORRECT_ACTIONS = {
     "spam":   "delete",
 }
 
-BODIES = {
-    "urgent": "This is a critical issue that requires your immediate attention. Please respond as soon as possible.",
-    "normal": "Just wanted to keep you in the loop. No rush on this one, but please review when you get a chance.",
-    "spam":   "Click the link below to claim your reward. Limited time offer! Don't miss out!!!",
-}
+URGENT_BODIES = [
+    "This is a critical issue that requires your immediate attention. Please respond as soon as possible.",
+    "We have detected a serious problem that needs to be resolved urgently. Please act now.",
+    "Immediate action required. This cannot wait. Please respond within the hour.",
+    "This is time-sensitive. The team is blocked until this is resolved. Need your input now.",
+]
+
+NORMAL_BODIES = [
+    "Just wanted to keep you in the loop. No rush on this one, review when you get a chance.",
+    "Please find the attached information for your review. Let me know if you have questions.",
+    "Following up on our last conversation. Happy to discuss further at your convenience.",
+    "Sharing this update with the team. No action needed unless you have concerns.",
+]
+
+SPAM_BODIES = [
+    "Click the link below to claim your reward. Limited time offer! Don't miss out!!!",
+    "You have been specially selected. Act now before this offer expires tonight!!!",
+    "Congratulations! You are our lucky winner. Send your details to claim your prize.",
+    "Make money from home guaranteed. Thousands already earning. Join now for free!!!",
+]
 
 def generate_emails(count: int, seed: int = 42) -> list:
     random.seed(seed)
@@ -62,6 +77,8 @@ def generate_emails(count: int, seed: int = 42) -> list:
     random.shuffle(labels)
     emails = []
     for i, label in enumerate(labels):
+        bodies = URGENT_BODIES if label == "urgent" else \
+                 NORMAL_BODIES if label == "normal" else SPAM_BODIES
         emails.append({
             "id":          f"email_{i}",
             "subject":     random.choice(
@@ -70,7 +87,7 @@ def generate_emails(count: int, seed: int = 42) -> list:
                                SPAM_SUBJECTS
                            ),
             "sender":      random.choice(SENDERS[label]),
-            "body":        BODIES[label],
+            "body":        random.choice(bodies),
             "true_label":  label,
             "true_action": CORRECT_ACTIONS[label],
         })
