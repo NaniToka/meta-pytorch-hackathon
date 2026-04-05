@@ -1,10 +1,4 @@
-# env/graders.py
-
 def grade_labels(emails: list, agent_labels: dict) -> float:
-    """
-    Score how many email labels the agent got correct.
-    Example: 7 correct out of 10 = 0.7
-    """
     if not emails:
         return 0.0
     correct = sum(
@@ -15,10 +9,6 @@ def grade_labels(emails: list, agent_labels: dict) -> float:
 
 
 def grade_actions(emails: list, agent_actions: dict) -> float:
-    """
-    Score how many actions the agent got correct.
-    Example: 6 correct out of 10 = 0.6
-    """
     if not emails:
         return 0.0
     correct = sum(
@@ -29,32 +19,21 @@ def grade_actions(emails: list, agent_actions: dict) -> float:
 
 
 def grade_summary(emails: list, agent_summary: str) -> float:
-    """
-    Score the summary by checking if urgent email subjects are mentioned.
-    Example: 2 out of 3 urgent subjects mentioned = 0.666
-    """
     urgent_emails = [e for e in emails if e["true_label"] == "urgent"]
     if not urgent_emails:
         return 1.0
     if not agent_summary or not agent_summary.strip():
         return 0.0
-    hits = sum(
-        1 for e in urgent_emails
-        if e["subject"][:15].lower() in agent_summary.lower()
-    )
+    summary_lower = agent_summary.lower()
+    hits = 0
+    for e in urgent_emails:
+        words = [w for w in e["subject"].lower().split() if len(w) > 3]
+        if any(w in summary_lower for w in words):
+            hits += 1
     return round(hits / len(urgent_emails), 4)
 
 
 def compute_reward(task_id: str, emails: list, agent_response: dict) -> dict:
-    """
-    Main reward function.
-
-    task1: only labels matter         → score = label accuracy
-    task2: labels + actions matter    → score = 50% labels + 50% actions
-    task3: labels + actions + summary → score = 40% labels + 40% actions + 20% summary
-
-    Always returns partial credit — never just 0 or 1.
-    """
     labels  = agent_response.get("labels",  {})
     actions = agent_response.get("actions", {})
     summary = agent_response.get("summary", "")
