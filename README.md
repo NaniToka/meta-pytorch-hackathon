@@ -7,21 +7,87 @@ sdk: docker
 port: 7860
 ---
 
-# Email Triage OpenEnv
+# 📧 Email Triage OpenEnv
 
-A real-world OpenEnv environment where AI agents learn to manage email inboxes.
+> A real-world reinforcement learning environment where AI agents learn to manage email inboxes.
 
-## Tasks
-| Task | Difficulty | Emails |
-|------|-----------|--------|
-| task1 | Easy | 10 |
-| task2 | Medium | 20 |
-| task3 | Hard | 30 |
+## 🎯 What Is This?
 
-## Baseline Scores
-| Task | Score |
-|------|-------|
-| task1 | 1.0 |
-| task2 | 1.0 |
-| task3 | 0.82 |
-| Average | 0.94 |
+Every company on Earth has the same problem — too many emails, too little time. This OpenEnv environment trains AI agents to:
+1. **Label** emails as `urgent`, `normal`, or `spam`
+2. **Decide actions** — `reply`, `archive`, or `delete`
+3. **Summarize** urgent emails for human review
+
+## 📊 Baseline Scores
+
+| Task | Difficulty | Emails | Score |
+|------|-----------|--------|-------|
+| task1 | 🟢 Easy | 10 | **1.0** |
+| task2 | 🟡 Medium | 20 | **1.0** |
+| task3 | 🔴 Hard | 30 | **0.82** |
+| **Average** | | | **0.94** |
+
+Model: `meta-llama/Llama-3.1-8B-Instruct`
+
+## 🏗️ Environment Design
+
+### Observation Space
+```json
+{
+  "task_id": "task1",
+  "task_name": "Email Labeling (Easy)",
+  "description": "You have 10 emails. Label each one.",
+  "emails": [
+    {"id": "email_0", "subject": "URGENT: Server is down",
+     "sender": "cto@company.com", "body": "..."}
+  ],
+  "step": 0,
+  "done": false
+}
+```
+
+### Action Space
+```json
+{
+  "task_id": "task1",
+  "labels":  {"email_0": "urgent", "email_1": "spam"},
+  "actions": {"email_0": "reply",  "email_1": "delete"},
+  "summary": "Urgent: server down, database corrupted."
+}
+```
+
+### Reward Function
+- **task1**: `label_accuracy`
+- **task2**: `0.5 × label_accuracy + 0.5 × action_accuracy`
+- **task3**: `0.4 × labels + 0.4 × actions + 0.2 × summary_quality`
+
+✅ Partial credit on every email — never binary win/loss
+
+## 🚀 Quick Start
+```bash
+git clone https://github.com/NaniToka/meta-pytorch-hackathon
+cd meta-pytorch-hackathon
+pip install -r requirements.txt
+uvicorn app.main:app --host 0.0.0.0 --port 7860
+```
+
+## 🤖 Run Baseline Agent
+```bash
+export HF_TOKEN=your_token
+export API_BASE_URL=https://router.huggingface.co/v1
+export MODEL_NAME=meta-llama/Llama-3.1-8B-Instruct
+export ENV_URL=https://tokanani786-meta-pytorch-hackathon.hf.space
+python inference.py
+```
+
+## 📡 API Reference
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/reset` | Start episode `{"task_id": "task1"}` |
+| POST | `/step` | Submit answers and get reward |
+| GET | `/state` | Current environment state |
+| GET | `/tasks` | List all tasks |
+| GET | `/health` | Health check |
+
+## 🗂️ Project Structure
