@@ -91,3 +91,13 @@ python inference.py
 | GET | `/health` | Health check |
 
 ## 🗂️ Project Structure
+├── env/
+│   ├── data.py        # Email dataset generator
+│   ├── graders.py     # Scoring logic (partial credit)
+│   ├── tasks.py       # 3 task definitions
+│   └── email_env.py   # Main environment (reset/step/state)
+├── app/
+│   └── main.py        # FastAPI server
+├── inference.py       # Baseline AI agent
+├── openenv.yaml       # OpenEnv spec
+└── Dockerfile         # Container config
