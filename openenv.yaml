@@ -1,0 +1,57 @@
+name: email-triage-env
+version: "1.0.0"
+description: >
+  A real-world email triage environment where AI agents learn to classify
+  emails as urgent, normal, or spam — then decide actions and write summaries.
+author: tokanani786
+tags: [email, triage, nlp, real-world, productivity]
+
+tasks:
+  - id: task1
+    name: "Email Labeling"
+    difficulty: easy
+    description: "Label 10 emails as urgent, normal, or spam."
+    max_steps: 1
+    reward_range: [0.0, 1.0]
+
+  - id: task2
+    name: "Email Triage"
+    difficulty: medium
+    description: "Label 20 emails AND choose action: reply, archive, or delete."
+    max_steps: 1
+    reward_range: [0.0, 1.0]
+
+  - id: task3
+    name: "Full Inbox Management"
+    difficulty: hard
+    description: "Label 30 emails, decide actions, write summary of urgent items."
+    max_steps: 1
+    reward_range: [0.0, 1.0]
+
+endpoints:
+  reset: POST /reset
+  step:  POST /step
+  state: GET  /state
+
+observation_space:
+  type: object
+  fields:
+    - task_id: string
+    - task_name: string
+    - description: string
+    - emails: list
+    - step: integer
+    - done: boolean
+
+action_space:
+  type: object
+  fields:
+    - task_id: string
+    - labels: dict
+    - actions: dict
+    - summary: string
+
+reward_space:
+  type: float
+  range: [0.0, 1.0]
+  partial_credit: true
