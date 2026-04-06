@@ -9,7 +9,7 @@ port: 7860
 
 # 📧 Email Triage OpenEnv
 
-> A real-world reinforcement learning environment where AI agents learn to manage email inboxes.
+> A real-world reinforcement learning environment where AI agents learn to manage email inboxes — built for the Meta PyTorch OpenEnv Hackathon.
 
 ## 🎯 What Is This?
 
@@ -18,14 +18,19 @@ Every company on Earth has the same problem — too many emails, too little time
 2. **Decide actions** — `reply`, `archive`, or `delete`
 3. **Summarize** urgent emails for human review
 
+## 🎮 Live Demo
+👉 **[Try it yourself here](https://tokanani786-meta-pytorch-hackathon.hf.space)**
+
+Label real emails, see your score instantly, and compete on the leaderboard!
+
 ## 📊 Baseline Scores
 
 | Task | Difficulty | Emails | Score |
 |------|-----------|--------|-------|
-| task1 | 🟢 Easy | 10 | **1.0** |
+| task1 | �� Easy | 10 | **1.0** |
 | task2 | 🟡 Medium | 20 | **1.0** |
-| task3 | 🔴 Hard | 30 | **0.82** |
-| **Average** | | | **0.94** |
+| task3 | 🔴 Hard | 30 | **0.89** |
+| **Average** | | | **0.93** |
 
 Model: `meta-llama/Llama-3.1-8B-Instruct`
 
@@ -38,8 +43,12 @@ Model: `meta-llama/Llama-3.1-8B-Instruct`
   "task_name": "Email Labeling (Easy)",
   "description": "You have 10 emails. Label each one.",
   "emails": [
-    {"id": "email_0", "subject": "URGENT: Server is down",
-     "sender": "cto@company.com", "body": "..."}
+    {
+      "id": "email_0",
+      "subject": "URGENT: Server is down",
+      "sender": "cto@company.com",
+      "body": "This is a critical issue..."
+    }
   ],
   "step": 0,
   "done": false
@@ -57,11 +66,13 @@ Model: `meta-llama/Llama-3.1-8B-Instruct`
 ```
 
 ### Reward Function
-- **task1**: `label_accuracy`
-- **task2**: `0.5 × label_accuracy + 0.5 × action_accuracy`
-- **task3**: `0.4 × labels + 0.4 × actions + 0.2 × summary_quality`
+| Task | Formula |
+|------|---------|
+| task1 | `label_accuracy` |
+| task2 | `0.5 × label_accuracy + 0.5 × action_accuracy` |
+| task3 | `0.4 × labels + 0.4 × actions + 0.2 × summary_quality` |
 
-✅ Partial credit on every email — never binary win/loss
+✅ **Partial credit on every email — never binary win/loss**
 
 ## 🚀 Quick Start
 ```bash
@@ -89,15 +100,22 @@ python inference.py
 | GET | `/state` | Current environment state |
 | GET | `/tasks` | List all tasks |
 | GET | `/health` | Health check |
+| GET | `/leaderboard` | Top scores |
 
 ## 🗂️ Project Structure
+meta-pytorch-hackathon/
+│
 ├── env/
-│   ├── data.py        # Email dataset generator
-│   ├── graders.py     # Scoring logic (partial credit)
-│   ├── tasks.py       # 3 task definitions
-│   └── email_env.py   # Main environment (reset/step/state)
+│   ├── data.py          # Email dataset generator (3 categories)
+│   ├── graders.py       # Scoring logic with partial credit
+│   ├── tasks.py         # 3 task definitions (easy/medium/hard)
+│   └── email_env.py     # Main environment (reset/step/state)
+│
 ├── app/
-│   └── main.py        # FastAPI server
-├── inference.py       # Baseline AI agent
-├── openenv.yaml       # OpenEnv spec
-└── Dockerfile         # Container config
+│   └── main.py          # FastAPI server + interactive web UI
+│
+├── inference.py         # Baseline AI agent script
+├── openenv.yaml         # OpenEnv spec compliance file
+├── Dockerfile           # Container configuration
+├── requirements.txt     # Python dependencies
+└── README.md            # This file
