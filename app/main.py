@@ -3,7 +3,7 @@ from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 from typing import Optional
 from env.email_env import EmailTriageEnv, EmailAction
-import json, time
+import time
 
 app = FastAPI(title="Email Triage OpenEnv")
 envs: dict = {}
@@ -19,8 +19,8 @@ class StepRequest(BaseModel):
     summary: str  = ""
 
 class LeaderboardEntry(BaseModel):
-    name: str
-    score: float
+    name:    str
+    score:   float
     task_id: str
 
 @app.get("/", response_class=HTMLResponse)
@@ -47,7 +47,7 @@ body{font-family:-apple-system,sans-serif;background:#0f172a;color:#e2e8f0;min-h
 .dot{width:8px;height:8px;background:#4ade80;border-radius:50%;animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 .nav{display:flex;justify-content:center;gap:8px;margin-top:24px;flex-wrap:wrap}
-.nav-btn{padding:8px 20px;border-radius:8px;border:none;background:#1e293b;color:#94a3b8;cursor:pointer;font-size:0.9rem;font-weight:600;border:1px solid #334155;transition:all .2s}
+.nav-btn{padding:8px 20px;border-radius:8px;border:1px solid #334155;background:#1e293b;color:#94a3b8;cursor:pointer;font-size:0.9rem;font-weight:600;transition:all .2s}
 .nav-btn.active{background:#2563eb;color:#fff;border-color:#3b82f6}
 .nav-btn:hover{color:#fff;border-color:#60a5fa}
 .container{max-width:1100px;margin:0 auto;padding:40px 20px}
@@ -68,15 +68,20 @@ body{font-family:-apple-system,sans-serif;background:#0f172a;color:#e2e8f0;min-h
 .task-tabs{display:flex;gap:10px;margin-bottom:24px;flex-wrap:wrap}
 .tab{padding:8px 20px;border-radius:8px;border:1px solid #334155;background:#0f172a;color:#94a3b8;cursor:pointer;font-size:0.9rem;font-weight:600;transition:all .2s}
 .tab.active{background:#1d4ed8;border-color:#3b82f6;color:#fff}
-.email-grid{display:flex;flex-direction:column;gap:10px;margin-bottom:20px;max-height:420px;overflow-y:auto;padding-right:4px}
-.email-card{background:#0f172a;border:1px solid #334155;border-radius:10px;padding:14px;display:flex;align-items:flex-start;gap:12px;transition:border-color .2s}
-.email-card.correct{border-color:#22c55e}
-.email-card.wrong{border-color:#ef4444}
+.email-grid{display:flex;flex-direction:column;gap:10px;margin-bottom:20px;max-height:460px;overflow-y:auto;padding-right:4px}
+.email-card{background:#0f172a;border:1px solid #334155;border-radius:10px;padding:14px;display:flex;align-items:flex-start;gap:12px;transition:border-color .3s,background .3s}
+.email-card.correct{border-color:#22c55e;background:#0d1f12}
+.email-card.wrong{border-color:#ef4444;background:#1f0d0d}
 .email-info{flex:1;min-width:0}
 .email-subject{font-weight:600;font-size:0.92rem;color:#f1f5f9;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .email-sender{font-size:0.78rem;color:#64748b}
 .email-body{font-size:0.8rem;color:#94a3b8;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.controls{display:flex;flex-direction:column;gap:6px;min-width:200px}
+.email-result{font-size:0.75rem;margin-top:6px;padding:4px 8px;border-radius:6px;display:none}
+.email-result.show{display:block}
+.email-result.ok{background:#14532d;color:#86efac}
+.email-result.bad{background:#7f1d1d;color:#fca5a5}
+.result-icon{font-size:1.2rem;margin-right:4px}
+.controls{display:flex;flex-direction:column;gap:6px;min-width:190px}
 .sel{background:#1e293b;border:1px solid #475569;color:#e2e8f0;padding:5px 8px;border-radius:6px;font-size:0.82rem;width:100%}
 .summary-box{margin-bottom:18px}
 .summary-box textarea{width:100%;background:#0f172a;border:1px solid #475569;color:#e2e8f0;padding:10px;border-radius:8px;font-size:0.88rem;resize:vertical;font-family:inherit}
@@ -97,20 +102,13 @@ body{font-family:-apple-system,sans-serif;background:#0f172a;color:#e2e8f0;min-h
 .loading.show{display:block}
 .spinner{display:inline-block;width:20px;height:20px;border:3px solid #334155;border-top-color:#3b82f6;border-radius:50%;animation:spin .8s linear infinite;margin-right:8px;vertical-align:middle}
 @keyframes spin{to{transform:rotate(360deg)}}
-.name-input{background:#0f172a;border:1px solid #475569;color:#e2e8f0;padding:8px 12px;border-radius:8px;font-size:0.9rem;width:200px;margin-right:10px}
-.name-input:focus{outline:none;border-color:#3b82f6}
-
-/* LEADERBOARD */
+.name-input{background:#0f172a;border:1px solid #475569;color:#e2e8f0;padding:8px 12px;border-radius:8px;font-size:0.9rem;width:180px;margin-right:10px}
 .lb-table{width:100%;border-collapse:collapse;background:#1e293b;border-radius:12px;overflow:hidden}
 .lb-table th{background:#0f172a;padding:12px 16px;text-align:left;font-size:0.82rem;color:#64748b;text-transform:uppercase}
 .lb-table td{padding:12px 16px;border-top:1px solid #334155;font-size:0.9rem}
-.lb-table tr:hover td{background:#243447}
-.rank{font-weight:800;font-size:1rem}
-.r1{color:#fbbf24}.r2{color:#94a3b8}.r3{color:#b45309}
+.rank{font-weight:800}.r1{color:#fbbf24}.r2{color:#94a3b8}.r3{color:#b45309}
 .lb-score{font-weight:700;color:#4ade80}
 .lb-empty{text-align:center;padding:40px;color:#475569}
-
-/* API PLAYGROUND */
 .playground{background:#1e293b;border:1px solid #334155;border-radius:14px;padding:24px;margin-bottom:20px}
 .playground h3{font-size:1rem;font-weight:700;margin-bottom:14px;color:#60a5fa}
 .play-row{display:flex;gap:10px;margin-bottom:12px;align-items:center;flex-wrap:wrap}
@@ -121,8 +119,6 @@ body{font-family:-apple-system,sans-serif;background:#0f172a;color:#e2e8f0;min-h
 .play-response{background:#0f172a;border-radius:8px;padding:14px;font-family:monospace;font-size:0.78rem;color:#86efac;white-space:pre-wrap;max-height:200px;overflow-y:auto;border:1px solid #1e293b;margin-top:10px}
 .method-badge{padding:3px 8px;border-radius:6px;font-size:0.78rem;font-weight:700;font-family:monospace}
 .get{background:#166534;color:#86efac}.post{background:#1e40af;color:#93c5fd}
-
-/* API TABLE */
 .api-table{width:100%;border-collapse:collapse;background:#1e293b;border-radius:12px;overflow:hidden}
 .api-table th{background:#0f172a;padding:11px 16px;text-align:left;font-size:0.82rem;color:#64748b;text-transform:uppercase}
 .api-table td{padding:11px 16px;border-top:1px solid #334155;font-size:0.88rem}
@@ -131,11 +127,12 @@ code{background:#0f172a;padding:2px 8px;border-radius:6px;font-family:monospace;
 .rrow{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #334155}
 .rrow:last-child{border:none}
 .footer{text-align:center;padding:36px;color:#475569;font-size:0.88rem;border-top:1px solid #1e293b;margin-top:20px}
+.feedback-summary{background:#1e293b;border-radius:10px;padding:14px;margin-bottom:14px;font-size:0.88rem}
+.feedback-summary span{margin-right:16px;font-weight:600}
 @media(max-width:700px){.grid3{grid-template-columns:1fr}.controls{min-width:120px}.hero h1{font-size:1.8rem}}
 </style>
 </head>
 <body>
-
 <div class="hero">
   <h1>📧 Email Triage <span>OpenEnv</span></h1>
   <p>A real-world reinforcement learning environment where AI agents learn to manage email inboxes.</p>
@@ -147,10 +144,10 @@ code{background:#0f172a;padding:2px 8px;border-radius:6px;font-family:monospace;
   </div>
   <div class="status"><div class="dot"></div> Live &amp; Running</div>
   <div class="nav">
-    <button class="nav-btn active" onclick="showPage('demo')">🎮 Live Demo</button>
-    <button class="nav-btn" onclick="showPage('leaderboard')">🏆 Leaderboard</button>
-    <button class="nav-btn" onclick="showPage('playground')">⚡ API Playground</button>
-    <button class="nav-btn" onclick="showPage('about')">📖 About</button>
+    <button class="nav-btn active" onclick="showPage('demo',this)">🎮 Live Demo</button>
+    <button class="nav-btn" onclick="showPage('leaderboard',this)">�� Leaderboard</button>
+    <button class="nav-btn" onclick="showPage('playground',this)">⚡ API Playground</button>
+    <button class="nav-btn" onclick="showPage('about',this)">📖 About</button>
   </div>
 </div>
 
@@ -164,23 +161,24 @@ code{background:#0f172a;padding:2px 8px;border-radius:6px;font-family:monospace;
       <div class="task-tabs">
         <button class="tab active" onclick="selectTask('task1')">📧 Easy — 10 emails</button>
         <button class="tab" onclick="selectTask('task2')">📬 Medium — 20 emails</button>
-        <button class="tab" onclick="selectTask('task3')">📮 Hard — 30 emails</button>
+        <button class="tab" onclick="selectTask('task3')">📮 Hard — 30 emails ⚠️ Tricky!</button>
       </div>
       <div id="demo-loading" class="loading"><span class="spinner"></span> Loading emails...</div>
       <div id="email-list" class="email-grid"></div>
       <div id="summary-section" class="summary-box" style="display:none">
-        <label>📝 Write a summary of urgent emails:</label>
+        <label>📝 Write a summary of urgent emails (watch out for phishing!):</label>
         <textarea id="summary-input" rows="3" placeholder="Summarize the urgent emails here..."></textarea>
       </div>
       <div style="display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:10px">
-        <input class="name-input" id="player-name" type="text" placeholder="Your name (for leaderboard)"/>
+        <input class="name-input" id="player-name" type="text" placeholder="Your name (leaderboard)"/>
         <button class="btn btn-primary" id="submit-btn" onclick="submitAnswers()" disabled>Submit Answers</button>
         <button class="btn btn-reset" onclick="selectTask(currentTask)">🔄 Reset</button>
         <span id="progress-text" style="color:#64748b;font-size:0.85rem"></span>
       </div>
-      <div id="submit-loading" class="loading"><span class="spinner"></span> Scoring...</div>
+      <div id="submit-loading" class="loading"><span class="spinner"></span> Scoring your answers...</div>
       <div id="result-box" class="result-box">
-        <div style="font-size:1.1rem;font-weight:700;margin-bottom:14px">📊 Your Results</div>
+        <div style="font-size:1.1rem;font-weight:700;margin-bottom:10px">📊 Your Results</div>
+        <div id="feedback-summary" class="feedback-summary"></div>
         <div class="score-row">
           <span class="score-label">Label accuracy</span>
           <div style="display:flex;align-items:center;gap:12px">
@@ -205,7 +203,7 @@ code{background:#0f172a;padding:2px 8px;border-radius:6px;font-family:monospace;
         <div class="final-score" id="final-score">-</div>
         <div style="text-align:center;color:#94a3b8;font-size:0.88rem;margin-bottom:12px">Final Score (0.0 – 1.0)</div>
         <div style="text-align:center">
-          <button class="btn btn-primary" onclick="showPage('leaderboard')">🏆 View Leaderboard</button>
+          <button class="btn btn-primary" onclick="showPage('leaderboard',null)">🏆 View Leaderboard</button>
         </div>
       </div>
     </div>
@@ -218,9 +216,9 @@ code{background:#0f172a;padding:2px 8px;border-radius:6px;font-family:monospace;
     <h2>🏆 Leaderboard — Top Scores</h2>
     <div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap">
       <button class="tab active" id="lb-tab-all" onclick="filterLB('all')">All Tasks</button>
-      <button class="tab" id="lb-tab-task1" onclick="filterLB('task1')">Task 1 — Easy</button>
-      <button class="tab" id="lb-tab-task2" onclick="filterLB('task2')">Task 2 — Medium</button>
-      <button class="tab" id="lb-tab-task3" onclick="filterLB('task3')">Task 3 — Hard</button>
+      <button class="tab" id="lb-tab-task1" onclick="filterLB('task1')">Task 1 Easy</button>
+      <button class="tab" id="lb-tab-task2" onclick="filterLB('task2')">Task 2 Medium</button>
+      <button class="tab" id="lb-tab-task3" onclick="filterLB('task3')">Task 3 Hard</button>
     </div>
     <table class="lb-table">
       <thead><tr><th>Rank</th><th>Name</th><th>Task</th><th>Score</th><th>Time</th></tr></thead>
@@ -229,25 +227,27 @@ code{background:#0f172a;padding:2px 8px;border-radius:6px;font-family:monospace;
   </div>
 </div>
 
-<!-- API PLAYGROUND PAGE -->
+<!-- PLAYGROUND PAGE -->
 <div id="page-playground" class="page">
   <div class="section">
     <h2>⚡ API Playground — Test Endpoints Live</h2>
-
     <div class="playground">
-      <h3><span class="method-badge get">GET</span> /health — Check if server is running</h3>
-      <button class="play-btn" onclick="playHealth()">Send Request</button>
+      <h3><span class="method-badge get">GET</span> /health</h3>
+      <button class="play-btn" onclick="playReq('health')">Send</button>
       <div id="res-health" class="play-response" style="display:none"></div>
     </div>
-
     <div class="playground">
-      <h3><span class="method-badge get">GET</span> /tasks — List all tasks</h3>
-      <button class="play-btn" onclick="playTasks()">Send Request</button>
+      <h3><span class="method-badge get">GET</span> /tasks</h3>
+      <button class="play-btn" onclick="playReq('tasks')">Send</button>
       <div id="res-tasks" class="play-response" style="display:none"></div>
     </div>
-
     <div class="playground">
-      <h3><span class="method-badge post">POST</span> /reset — Start new episode</h3>
+      <h3><span class="method-badge get">GET</span> /stats</h3>
+      <button class="play-btn" onclick="playReq('stats')">Send</button>
+      <div id="res-stats" class="play-response" style="display:none"></div>
+    </div>
+    <div class="playground">
+      <h3><span class="method-badge post">POST</span> /reset</h3>
       <div class="play-row">
         <span class="play-label">task_id</span>
         <select class="play-select" id="play-reset-task">
@@ -256,12 +256,11 @@ code{background:#0f172a;padding:2px 8px;border-radius:6px;font-family:monospace;
           <option value="task3">task3 (Hard)</option>
         </select>
       </div>
-      <button class="play-btn" onclick="playReset()">Send Request</button>
+      <button class="play-btn" onclick="playReset()">Send</button>
       <div id="res-reset" class="play-response" style="display:none"></div>
     </div>
-
     <div class="playground">
-      <h3><span class="method-badge get">GET</span> /state — Current environment state</h3>
+      <h3><span class="method-badge get">GET</span> /state</h3>
       <div class="play-row">
         <span class="play-label">task_id</span>
         <select class="play-select" id="play-state-task">
@@ -270,10 +269,9 @@ code{background:#0f172a;padding:2px 8px;border-radius:6px;font-family:monospace;
           <option value="task3">task3</option>
         </select>
       </div>
-      <button class="play-btn" onclick="playState()">Send Request</button>
+      <button class="play-btn" onclick="playState()">Send</button>
       <div id="res-state" class="play-response" style="display:none"></div>
     </div>
-
   </div>
 </div>
 
@@ -284,7 +282,7 @@ code{background:#0f172a;padding:2px 8px;border-radius:6px;font-family:monospace;
     <div class="grid3">
       <div class="card"><span class="diff easy">Easy</span><h3>Task 1 — Email Labeling</h3><div class="score sg">1.0</div><p>Label 10 emails as <code>urgent</code>, <code>normal</code>, or <code>spam</code>.</p></div>
       <div class="card"><span class="diff medium">Medium</span><h3>Task 2 — Email Triage</h3><div class="score sg">1.0</div><p>Label 20 emails AND decide: <code>reply</code>, <code>archive</code>, or <code>delete</code>.</p></div>
-      <div class="card"><span class="diff hard">Hard</span><h3>Task 3 — Full Inbox</h3><div class="score sb">0.89</div><p>Label 30 emails, decide actions, AND write an urgent summary.</p></div>
+      <div class="card"><span class="diff hard">Hard</span><h3>Task 3 — Full Inbox</h3><div class="score sb">0.79</div><p>30 emails including tricky phishing attempts. Label, act, summarize.</p></div>
     </div>
   </div>
   <div class="section">
@@ -301,10 +299,12 @@ code{background:#0f172a;padding:2px 8px;border-radius:6px;font-family:monospace;
     <table class="api-table">
       <tr><th>Method</th><th>Endpoint</th><th>Description</th></tr>
       <tr><td><span class="method-badge post">POST</span></td><td><code>/reset</code></td><td>Start new episode</td></tr>
-      <tr><td><span class="method-badge post">POST</span></td><td><code>/step</code></td><td>Submit answers — get reward</td></tr>
-      <tr><td><span class="method-badge get">GET</span></td><td><code>/state</code></td><td>Current state</td></tr>
+      <tr><td><span class="method-badge post">POST</span></td><td><code>/step</code></td><td>Submit answers — get reward + feedback</td></tr>
+      <tr><td><span class="method-badge get">GET</span></td><td><code>/state</code></td><td>Current environment state</td></tr>
       <tr><td><span class="method-badge get">GET</span></td><td><code>/tasks</code></td><td>List all tasks</td></tr>
       <tr><td><span class="method-badge get">GET</span></td><td><code>/health</code></td><td>Health check</td></tr>
+      <tr><td><span class="method-badge get">GET</span></td><td><code>/stats</code></td><td>Environment statistics</td></tr>
+      <tr><td><span class="method-badge get">GET</span></td><td><code>/leaderboard</code></td><td>Top scores</td></tr>
     </table>
   </div>
 </div>
@@ -314,14 +314,12 @@ code{background:#0f172a;padding:2px 8px;border-radius:6px;font-family:monospace;
 
 <script>
 let currentTask='task1',emails=[],userLabels={},userActions={},lbData=[],lbFilter='all';
-const LABEL_OPTIONS=['urgent','normal','spam'];
-const ACTION_OPTIONS=['reply','archive','delete'];
 
-function showPage(p){
+function showPage(p,btn){
   document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));
   document.getElementById('page-'+p).classList.add('active');
-  event.target.classList.add('active');
+  if(btn) btn.classList.add('active');
   if(p==='leaderboard') renderLB();
 }
 
@@ -339,7 +337,7 @@ async function selectTask(taskId){
   try{
     const res=await fetch('/reset',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({task_id:taskId})});
     const data=await res.json(); emails=data.emails; renderEmails();
-  }catch(e){document.getElementById('email-list').innerHTML='<p style="color:#f87171">Error loading. Refresh page.</p>';}
+  }catch(e){document.getElementById('email-list').innerHTML='<p style="color:#f87171">Error loading. Refresh.</p>';}
   document.getElementById('demo-loading').classList.remove('show');
 }
 
@@ -351,15 +349,20 @@ function renderEmails(){
       <div class="email-subject">${email.subject}</div>
       <div class="email-sender">From: ${email.sender}</div>
       <div class="email-body">${email.body}</div>
+      <div class="email-result" id="result-${email.id}"></div>
     </div>
     <div class="controls">
       <select class="sel" id="label-${email.id}" onchange="updateLabel('${email.id}')">
         <option value="">Label...</option>
-        ${LABEL_OPTIONS.map(l=>`<option value="${l}">${l}</option>`).join('')}
+        <option value="urgent">urgent</option>
+        <option value="normal">normal</option>
+        <option value="spam">spam</option>
       </select>
       ${currentTask!=='task1'?`<select class="sel" id="action-${email.id}" onchange="updateAction('${email.id}')">
         <option value="">Action...</option>
-        ${ACTION_OPTIONS.map(a=>`<option value="${a}">${a}</option>`).join('')}
+        <option value="reply">reply</option>
+        <option value="archive">archive</option>
+        <option value="delete">delete</option>
       </select>`:''}
     </div>`;
     c.appendChild(d);
@@ -369,25 +372,25 @@ function renderEmails(){
 
 function updateLabel(id){
   const val=document.getElementById('label-'+id).value;
-  if(val){userLabels[id]=val;
+  if(val){
+    userLabels[id]=val;
     if(currentTask!=='task1'){
       const m={urgent:'reply',normal:'archive',spam:'delete'};
       const s=document.getElementById('action-'+id);
       if(s&&!userActions[id]){s.value=m[val];userActions[id]=m[val];}
     }
-  }else delete userLabels[id];
+  } else delete userLabels[id];
   updateProgress();
 }
 
 function updateAction(id){
   const val=document.getElementById('action-'+id).value;
-  if(val)userActions[id]=val; else delete userActions[id];
+  if(val) userActions[id]=val; else delete userActions[id];
   updateProgress();
 }
 
 function updateProgress(){
-  const total=emails.length,labeled=Object.keys(userLabels).length;
-  const actioned=Object.keys(userActions).length;
+  const total=emails.length,labeled=Object.keys(userLabels).length,actioned=Object.keys(userActions).length;
   const ready=currentTask==='task1'?labeled===total:labeled===total&&actioned===total;
   document.getElementById('progress-text').textContent=currentTask==='task1'?`${labeled}/${total} labeled`:`${labeled}/${total} labeled · ${actioned}/${total} actioned`;
   document.getElementById('submit-btn').disabled=!ready;
@@ -403,6 +406,8 @@ async function submitAnswers(){
     const data=await res.json(); const r=data.reward;
     const pct=v=>Math.round(v*100)+'%';
     const col=v=>v>=0.8?'#4ade80':v>=0.5?'#facc15':'#f87171';
+
+    // Score bars
     document.getElementById('bar-label').style.width=pct(r.label_score);
     document.getElementById('val-label').textContent=pct(r.label_score);
     document.getElementById('val-label').style.color=col(r.label_score);
@@ -414,13 +419,40 @@ async function submitAnswers(){
     document.getElementById('val-summary').style.color=col(r.summary_score);
     const fs=document.getElementById('final-score');
     fs.textContent=r.value.toFixed(2); fs.style.color=col(r.value);
+
+    // ✅❌ Per-email visual feedback
+    let correct=0, wrong=0;
+    if(r.feedback && r.feedback.length){
+      r.feedback.forEach(f=>{
+        const card=document.getElementById('card-'+f.id);
+        const resultEl=document.getElementById('result-'+f.id);
+        const isOk = f.label_correct && (currentTask==='task1' || f.action_correct);
+        if(isOk){
+          card.classList.add('correct'); card.classList.remove('wrong');
+          resultEl.className='email-result show ok';
+          resultEl.innerHTML=`✅ Correct! Label: <b>${f.true_label}</b>`;
+          correct++;
+        } else {
+          card.classList.add('wrong'); card.classList.remove('correct');
+          resultEl.className='email-result show bad';
+          resultEl.innerHTML=`❌ Wrong! You: <b>${f.your_label||'?'}</b> → Correct: <b>${f.true_label}</b>`;
+          wrong++;
+        }
+      });
+    }
+
+    // Feedback summary
+    document.getElementById('feedback-summary').innerHTML=
+      `<span style="color:#4ade80">✅ ${correct} correct</span>
+       <span style="color:#f87171">❌ ${wrong} wrong</span>
+       <span style="color:#94a3b8">out of ${emails.length} emails</span>`;
+
     document.getElementById('result-box').classList.add('show');
 
-    // Save to leaderboard
+    // Leaderboard
     const name=document.getElementById('player-name').value||'Anonymous';
-    const entry={name,score:r.value,task_id:currentTask,time:new Date().toLocaleTimeString()};
-    await fetch('/leaderboard',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(entry)});
-    lbData.push(entry); lbData.sort((a,b)=>b.score-a.score);
+    await fetch('/leaderboard',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({name,score:r.value,task_id:currentTask})});
   }catch(e){alert('Error. Try again.');}
   document.getElementById('submit-loading').classList.remove('show');
   document.getElementById('submit-btn').disabled=false;
@@ -434,16 +466,12 @@ function filterLB(f){
 }
 
 async function renderLB(){
-  try{
-    const res=await fetch('/leaderboard'); const data=await res.json();
-    lbData=data.entries||[];
-  }catch(e){}
+  try{const res=await fetch('/leaderboard');const data=await res.json();lbData=data.entries||[];}catch(e){}
   const filtered=lbFilter==='all'?lbData:lbData.filter(e=>e.task_id===lbFilter);
   const tbody=document.getElementById('lb-body');
   if(!filtered.length){tbody.innerHTML='<tr><td colspan="5" class="lb-empty">No scores yet. Be the first! 🎯</td></tr>';return;}
-  const rankClass=['r1','r2','r3'];
   tbody.innerHTML=filtered.map((e,i)=>`<tr>
-    <td class="rank ${rankClass[i]||''}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</td>
+    <td class="rank ${['r1','r2','r3'][i]||''}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</td>
     <td>${e.name}</td>
     <td><span class="diff ${e.task_id==='task1'?'easy':e.task_id==='task2'?'medium':'hard'}">${e.task_id}</span></td>
     <td class="lb-score">${(e.score*100).toFixed(0)}%</td>
@@ -451,27 +479,22 @@ async function renderLB(){
   </tr>`).join('');
 }
 
-async function playHealth(){
-  const res=await fetch('/health'); const d=await res.json();
-  show('res-health',JSON.stringify(d,null,2));
-}
-async function playTasks(){
-  const res=await fetch('/tasks'); const d=await res.json();
-  show('res-tasks',JSON.stringify(d,null,2));
+async function playReq(ep){
+  const res=await fetch('/'+ep);const d=await res.json();
+  const el=document.getElementById('res-'+ep);el.style.display='block';el.textContent=JSON.stringify(d,null,2);
 }
 async function playReset(){
   const t=document.getElementById('play-reset-task').value;
   const res=await fetch('/reset',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({task_id:t})});
   const d=await res.json();
-  const preview={...d,emails:d.emails.slice(0,2).concat([{note:`...and ${d.emails.length-2} more emails`}])};
-  show('res-reset',JSON.stringify(preview,null,2));
+  const preview={...d,emails:d.emails.slice(0,2).concat([{note:`...and ${d.emails.length-2} more`}])};
+  const el=document.getElementById('res-reset');el.style.display='block';el.textContent=JSON.stringify(preview,null,2);
 }
 async function playState(){
   const t=document.getElementById('play-state-task').value;
-  const res=await fetch('/state?task_id='+t); const d=await res.json();
-  show('res-state',JSON.stringify(d,null,2));
+  const res=await fetch('/state?task_id='+t);const d=await res.json();
+  const el=document.getElementById('res-state');el.style.display='block';el.textContent=JSON.stringify(d,null,2);
 }
-function show(id,text){const el=document.getElementById(id);el.style.display='block';el.textContent=text;}
 
 selectTask('task1');
 </script>
@@ -519,24 +542,28 @@ def list_tasks():
 def health():
     return {"status": "ok"}
 
+@app.get("/stats")
+def stats():
+    return {
+        "total_episodes": len(envs),
+        "active_tasks":   list(envs.keys()),
+        "tasks_available": 3,
+        "score_range":    "0.0 - 1.0",
+        "environment":    "email-triage-openenv",
+        "version":        "1.0.0",
+    }
+
 @app.post("/leaderboard")
 def add_leaderboard(entry: LeaderboardEntry):
-    leaderboard.append({"name": entry.name, "score": entry.score, "task_id": entry.task_id, "time": time.strftime("%H:%M:%S")})
+    leaderboard.append({
+        "name":    entry.name,
+        "score":   entry.score,
+        "task_id": entry.task_id,
+        "time":    time.strftime("%H:%M:%S"),
+    })
     leaderboard.sort(key=lambda x: x["score"], reverse=True)
     return {"status": "ok"}
 
 @app.get("/leaderboard")
 def get_leaderboard():
     return {"entries": leaderboard[:20]}
-
-@app.get("/stats")
-def stats():
-    """Returns environment statistics for monitoring"""
-    return {
-        "total_episodes": len(envs),
-        "active_tasks": list(envs.keys()),
-        "tasks_available": 3,
-        "score_range": "0.0 - 1.0",
-        "environment": "email-triage-openenv",
-        "version": "1.0.0",
-    }
