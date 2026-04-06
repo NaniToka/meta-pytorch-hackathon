@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "email-triage-openenv"
+version = "1.0.0"
+description = "A real-world email triage environment for OpenEnv"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "pydantic",
+    "openai",
+    "requests",
+]
+
+[project.urls]
+Homepage = "https://huggingface.co/spaces/tokanani786/meta-pytorch-hackathon"
+Repository = "https://github.com/NaniToka/meta-pytorch-hackathon"
