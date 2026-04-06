@@ -1,4 +1,3 @@
-# env/tasks.py
 from env.data import generate_emails
 
 TASKS = {
@@ -10,6 +9,7 @@ TASKS = {
         "requires_actions": False,
         "requires_summary": False,
         "seed":             1,
+        "tricky":           False,
     },
     "task2": {
         "id":               "task2",
@@ -19,18 +19,24 @@ TASKS = {
         "requires_actions": True,
         "requires_summary": False,
         "seed":             2,
+        "tricky":           False,
     },
     "task3": {
         "id":               "task3",
         "name":             "Full Inbox Management (Hard)",
-        "description":      "You have 30 emails. Label each one, decide the action, AND write a short summary of all urgent emails.",
+        "description":      "You have 30 emails including tricky phishing attempts. Label each one, decide the action, AND write a short summary of all urgent emails. Watch out for emails that look urgent but are actually spam!",
         "email_count":      30,
         "requires_actions": True,
         "requires_summary": True,
         "seed":             3,
+        "tricky":           True,
     },
 }
 
 def get_task_emails(task_id: str) -> list:
     task = TASKS[task_id]
-    return generate_emails(task["email_count"], seed=task["seed"])
+    return generate_emails(
+        task["email_count"],
+        seed=task["seed"],
+        tricky=task.get("tricky", False)
+    )

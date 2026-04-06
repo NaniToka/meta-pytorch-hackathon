@@ -528,3 +528,15 @@ def add_leaderboard(entry: LeaderboardEntry):
 @app.get("/leaderboard")
 def get_leaderboard():
     return {"entries": leaderboard[:20]}
+
+@app.get("/stats")
+def stats():
+    """Returns environment statistics for monitoring"""
+    return {
+        "total_episodes": len(envs),
+        "active_tasks": list(envs.keys()),
+        "tasks_available": 3,
+        "score_range": "0.0 - 1.0",
+        "environment": "email-triage-openenv",
+        "version": "1.0.0",
+    }
