@@ -33,6 +33,26 @@ def grade_summary(emails: list, agent_summary: str) -> float:
     return round(hits / len(urgent_emails), 4)
 
 
+def get_per_email_feedback(emails: list, agent_labels: dict, agent_actions: dict) -> list:
+    """Returns per-email correctness for visual feedback in demo"""
+    feedback = []
+    for e in emails:
+        agent_label  = agent_labels.get(e["id"], "").lower().strip()
+        agent_action = agent_actions.get(e["id"], "").lower().strip()
+        label_correct  = agent_label  == e["true_label"]
+        action_correct = agent_action == e["true_action"]
+        feedback.append({
+            "id":             e["id"],
+            "label_correct":  label_correct,
+            "action_correct": action_correct,
+            "true_label":     e["true_label"],
+            "true_action":    e["true_action"],
+            "your_label":     agent_label,
+            "your_action":    agent_action,
+        })
+    return feedback
+
+
 def compute_reward(task_id: str, emails: list, agent_response: dict) -> dict:
     labels  = agent_response.get("labels",  {})
     actions = agent_response.get("actions", {})
@@ -41,6 +61,7 @@ def compute_reward(task_id: str, emails: list, agent_response: dict) -> dict:
     label_score   = grade_labels(emails, labels)
     action_score  = grade_actions(emails, actions)
     summary_score = grade_summary(emails, summary)
+    feedback      = get_per_email_feedback(emails, labels, actions)
 
     if task_id == "task1":
         final = label_score
@@ -56,4 +77,5 @@ def compute_reward(task_id: str, emails: list, agent_response: dict) -> dict:
         "label_score":   label_score,
         "action_score":  action_score,
         "summary_score": summary_score,
+        "feedback":      feedback,
     }
