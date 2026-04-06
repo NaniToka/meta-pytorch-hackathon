@@ -14,11 +14,13 @@ port: 7860
 ## 🎯 What Is This?
 
 Every company on Earth has the same problem — too many emails, too little time. This OpenEnv environment trains AI agents to:
+
 1. **Label** emails as `urgent`, `normal`, or `spam`
 2. **Decide actions** — `reply`, `archive`, or `delete`
 3. **Summarize** urgent emails for human review
 
 ## 🎮 Live Demo
+
 👉 **[Try it yourself here](https://tokanani786-meta-pytorch-hackathon.hf.space)**
 
 Label real emails, see your score instantly, and compete on the leaderboard!
@@ -27,7 +29,7 @@ Label real emails, see your score instantly, and compete on the leaderboard!
 
 | Task | Difficulty | Emails | Score |
 |------|-----------|--------|-------|
-| task1 | �� Easy | 10 | **1.0** |
+| task1 | 🟢 Easy | 10 | **1.0** |
 | task2 | 🟡 Medium | 20 | **1.0** |
 | task3 | 🔴 Hard | 30 | **0.89** |
 | **Average** | | | **0.93** |
@@ -41,7 +43,6 @@ Model: `meta-llama/Llama-3.1-8B-Instruct`
 {
   "task_id": "task1",
   "task_name": "Email Labeling (Easy)",
-  "description": "You have 10 emails. Label each one.",
   "emails": [
     {
       "id": "email_0",
@@ -66,6 +67,7 @@ Model: `meta-llama/Llama-3.1-8B-Instruct`
 ```
 
 ### Reward Function
+
 | Task | Formula |
 |------|---------|
 | task1 | `label_accuracy` |
@@ -95,7 +97,7 @@ python inference.py
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| POST | `/reset` | Start episode `{"task_id": "task1"}` |
+| POST | `/reset` | Start episode |
 | POST | `/step` | Submit answers and get reward |
 | GET | `/state` | Current environment state |
 | GET | `/tasks` | List all tasks |
@@ -103,19 +105,21 @@ python inference.py
 | GET | `/leaderboard` | Top scores |
 
 ## 🗂️ Project Structure
-meta-pytorch-hackathon/
-│
-├── env/
-│   ├── data.py          # Email dataset generator (3 categories)
-│   ├── graders.py       # Scoring logic with partial credit
-│   ├── tasks.py         # 3 task definitions (easy/medium/hard)
-│   └── email_env.py     # Main environment (reset/step/state)
-│
-├── app/
-│   └── main.py          # FastAPI server + interactive web UI
-│
-├── inference.py         # Baseline AI agent script
-├── openenv.yaml         # OpenEnv spec compliance file
-├── Dockerfile           # Container configuration
-├── requirements.txt     # Python dependencies
-└── README.md            # This file
+
+meta-pytorch-hackathon/ 
+├── env/ 
+│ ├── data.py # Email dataset generator 
+│ ├── graders.py # Scoring logic with partial credit
+│ ├── tasks.py # 3 task definitions 
+│ └── email_env.py # Main environment
+├── app/ 
+│ └── main.py # FastAPI server + web UI 
+├── inference.py # Baseline AI agent 
+├── openenv.yaml # OpenEnv spec file 
+├── Dockerfile # Container config 
+├── requirements.txt # Python dependencies 
+└── README.md # READ This File
+
+
+
+
