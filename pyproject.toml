@@ -17,7 +17,7 @@ dependencies = [
 ]
 
 [project.scripts]
-server = "app.main:app"
+server = "server.app:main"
 
 [project.urls]
 Homepage = "https://huggingface.co/spaces/tokanani786/meta-pytorch-hackathon"
