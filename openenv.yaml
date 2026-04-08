@@ -14,7 +14,7 @@ tasks:
     description: "Label 10 emails as urgent, normal, or spam."
     max_steps: 1
     reward_range: [0.001, 0.999]
-    baseline_score: 1.0
+    baseline_score: 0.999
 
   - id: task2
     name: "Email Triage"
@@ -22,7 +22,7 @@ tasks:
     description: "Label 20 emails AND choose action: reply, archive, or delete."
     max_steps: 1
     reward_range: [0.001, 0.999]
-    baseline_score: 1.0
+    baseline_score: 0.999
 
   - id: task3
     name: "Full Inbox Management"

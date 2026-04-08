@@ -19,8 +19,8 @@ client = OpenAI(base_url=API_BASE_URL, api_key=HF_TOKEN)
 
 
 def _clamp(x: float) -> float:
-    """Clamp any score strictly inside (0,1) and round to 4 decimals."""
-    return round(min(max(x, 0.001), 0.999), 4)
+    """Clamp any score strictly inside (0.001, 0.999) and round to 4 decimals."""
+    return round(max(0.001, min(float(x), 0.999)), 4)
 
 
 # ── System prompt for the AI agent ───────────────────────────────────────────
@@ -161,8 +161,7 @@ def main():
     for task_id in ["task1", "task2", "task3"]:
         scores[task_id] = run_task(task_id)
 
-    avg = sum(scores.values()) / len(scores)
-    avg = _clamp(avg)
+    avg = _clamp(sum(scores.values()) / len(scores))
 
     print(
         f"[END] task1={scores['task1']:.4f} "

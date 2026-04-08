@@ -1,6 +1,5 @@
 def _clamp_score(x: float) -> float:
-    eps = 1e-6
-    return max(eps, min(float(x), 1.0 - eps))
+    return round(max(0.001, min(float(x), 0.999)), 4)
 
 
 def grade_labels(emails: list, agent_labels: dict) -> float:
