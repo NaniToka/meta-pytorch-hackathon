@@ -280,8 +280,8 @@ code{background:#0f172a;padding:2px 8px;border-radius:6px;font-family:monospace;
   <div class="section">
     <h2>Tasks</h2>
     <div class="grid3">
-      <div class="card"><span class="diff easy">Easy</span><h3>Task 1 — Email Labeling</h3><div class="score sg">1.0</div><p>Label 10 emails as <code>urgent</code>, <code>normal</code>, or <code>spam</code>.</p></div>
-      <div class="card"><span class="diff medium">Medium</span><h3>Task 2 — Email Triage</h3><div class="score sg">1.0</div><p>Label 20 emails AND decide: <code>reply</code>, <code>archive</code>, or <code>delete</code>.</p></div>
+      <div class="card"><span class="diff easy">Easy</span><h3>Task 1 — Email Labeling</h3><div class="score sg">0.999</div><p>Label 10 emails as <code>urgent</code>, <code>normal</code>, or <code>spam</code>.</p></div>
+      <div class="card"><span class="diff medium">Medium</span><h3>Task 2 — Email Triage</h3><div class="score sg">0.999</div><p>Label 20 emails AND decide: <code>reply</code>, <code>archive</code>, or <code>delete</code>.</p></div>
       <div class="card"><span class="diff hard">Hard</span><h3>Task 3 — Full Inbox</h3><div class="score sb">0.79</div><p>30 emails including tricky phishing attempts. Label, act, summarize.</p></div>
     </div>
   </div>
@@ -548,7 +548,7 @@ def stats():
         "total_episodes": len(envs),
         "active_tasks":   list(envs.keys()),
         "tasks_available": 3,
-        "score_range":    "0.0 - 1.0",
+        "score_range":    "0.001 - 0.999",
         "environment":    "email-triage-openenv",
         "version":        "1.0.0",
     }
