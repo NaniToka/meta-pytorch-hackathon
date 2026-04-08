@@ -13,7 +13,7 @@ tasks:
     difficulty: easy
     description: "Label 10 emails as urgent, normal, or spam."
     max_steps: 1
-    reward_range: [0.0, 1.0]
+    reward_range: [0.001, 0.999]
     baseline_score: 1.0
 
   - id: task2
@@ -21,7 +21,7 @@ tasks:
     difficulty: medium
     description: "Label 20 emails AND choose action: reply, archive, or delete."
     max_steps: 1
-    reward_range: [0.0, 1.0]
+    reward_range: [0.001, 0.999]
     baseline_score: 1.0
 
   - id: task3
@@ -29,7 +29,7 @@ tasks:
     difficulty: hard
     description: "Label 30 emails including tricky phishing attempts, decide actions, write summary."
     max_steps: 1
-    reward_range: [0.0, 1.0]
+    reward_range: [0.001, 0.999]
     baseline_score: 0.79
 
 endpoints:
@@ -57,7 +57,7 @@ action_space:
 
 reward_space:
   type: float
-  range: [0.0, 1.0]
+  range: [0.001, 0.999]
   partial_credit: true
   breakdown:
     - label_score: float
